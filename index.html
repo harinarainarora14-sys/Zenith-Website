@@ -8,7 +8,9 @@
   <meta property="og:title" content="Interact Club Zenith | Bareilly" />
   <meta property="og:description" content="Youth-led volunteer organisation working for the betterment of society in Bareilly, Uttar Pradesh." />
   <meta property="og:type" content="website" />
+  <meta property="og:image" content="images/zenith-logo.png" />
   <meta name="theme-color" content="#1B4332" />
+  <link rel="icon" type="image/png" href="images/zenith-logo.png" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1587,18 +1589,16 @@
 
   <!-- Logo templates -->
   <template id="tpl-logo-small">
-    <img src="https://i.ibb.co/prdSgwHT/zenith-logo.png"
+    <img src="images/zenith-logo.png"
          alt="Interact Club Zenith logo"
          class="logo-img-small"
-         style="mix-blend-mode:multiply;"
          loading="eager" />
   </template>
   <template id="tpl-logo-large">
-    <img src="https://i.ibb.co/prdSgwHT/zenith-logo.png"
+    <img src="images/zenith-logo.png"
          alt=""
          aria-hidden="true"
          class="logo-img-large"
-         style="mix-blend-mode:multiply;"
          loading="eager" />
   </template>
 
@@ -1611,6 +1611,18 @@
       events:  'Events — Interact Club Zenith',
       join:    'Join Us — Interact Club Zenith',
       contact: 'Contact — Interact Club Zenith',
+    };
+
+    /* Per-section meta descriptions, applied to the single <meta name="description"> tag
+       on navigation so each "page" presents distinct, accurate copy. Improves how the
+       content reads when shared/crawled, even though this remains a single-document SPA. */
+    const PAGE_DESCRIPTIONS = {
+      home:    "Interact Club Zenith is a youth-led volunteer organisation in Bareilly, Uttar Pradesh, affiliated with Rotary Club South Bareilly — driving change through service, awareness, and compassion.",
+      about:   "Learn the story of Interact Club Zenith — founded March 2026 by Ayaan and Hari Narain Arora, guided by Rotary Club South Bareilly and the ideal of service above self.",
+      team:    "Meet the leadership and departments behind Interact Club Zenith — Management, Creative, Social Media, and Finance teams driving community service in Bareilly.",
+      events:  "See Interact Club Zenith's completed initiatives in Bareilly: BLOOM (tree plantation), BREATH (tobacco awareness with Dentwayy), and our International Yoga Day session.",
+      join:    "Join Interact Club Zenith as a volunteer — free to join, open to school students and community members in Bareilly. No specific skills required.",
+      contact: "Get in touch with Interact Club Zenith — email, Instagram, or volunteer registration for our Bareilly-based Rotary-affiliated youth organisation.",
     };
 
     /* ── LOGO INJECTION ── */
@@ -1626,7 +1638,9 @@
     }
 
     /* ── ROUTING ── */
-    let countersRun = false;
+    // Tracks which pages have already had their stat counters animated,
+    // so navigating back to Home replays the animation instead of it firing only once ever.
+    const countersAnimatedFor = new Set();
 
     function getPageId() {
       const id = window.location.hash.replace('#', '').trim();
@@ -1646,6 +1660,12 @@
       // Update document title
       document.title = PAGE_TITLES[id] || PAGE_TITLES.home;
 
+      // Update meta description for this section
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc && PAGE_DESCRIPTIONS[id]) {
+        metaDesc.setAttribute('content', PAGE_DESCRIPTIONS[id]);
+      }
+
       // Scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -1655,17 +1675,17 @@
         a.classList.toggle('active', href === id);
       });
 
-      // Animate fade elements
+      // Animate fade elements — reset so they replay each time a page is visited
+      target.querySelectorAll('.fade').forEach(el => el.classList.remove('visible'));
       requestAnimationFrame(() => {
         target.querySelectorAll('.fade:not(.visible)').forEach((el, i) => {
           setTimeout(() => el.classList.add('visible'), i * 70);
         });
       });
 
-      // Counter animation — trigger if home
-      if (id === 'home' && !countersRun) {
+      // Counter animation — replay every time Home is visited, not just once ever
+      if (id === 'home') {
         setTimeout(animateCounters, 400);
-        countersRun = true;
       }
     }
 
